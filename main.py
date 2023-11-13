@@ -1,51 +1,96 @@
-'''main game loop'''
+'''base game functions'''
 import pygame as pg
-
+import sys
 import constants as c
 from player import Player
+from sprites import Menus, ItemSprites
+from Inventory import Inventory
 
-pg.init()
-screen = pg.display.set_mode((1280, 720))
-pg.display.set_caption("Scratch's Inventory")
-scratch_icon = pg.image.load(c.SPRITES['icon']).convert_alpha()
-pg.display.set_icon(scratch_icon)
-clock = pg.time.Clock()
-player = Player()
+class Game():
+    def __init__(self):
+        pg.init()
+        self.screen = pg.display.set_mode((1280, 720))
+        self.clock = pg.time.Clock()
+        self.gameStateManager = GameStateManager('level')
 
-running = True
-while running:
+        # different game states
+        self.start = Start(self.screen, self.gameStateManager)
+        self.level = Level(self.screen, self.gameStateManager)
+        # dict of states
+        self.states = {
+            'start': self.start,
+            'level': self.level
+        }
 
-    #+==============+#
-    #~~Event~Poller~~#
-    #+==============+#
+    def set_screen(self):
+        pg.display.set_caption("Scratch's Inventory")
+        scratch_icon = pg.image.load(c.SPRITES['icon']).convert_alpha()
+        pg.display.set_icon(scratch_icon)
 
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
+    def main_game_loop(self):
+        while True:
 
-    keys = pg.key.get_pressed()
-    if keys == keys[pg.K_ESCAPE]:
-        running = False
+            #+==============+#
+            #~~Event~Poller~~#
+            #+==============+#
+            keys = pg.key.get_pressed()
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        pg.quit()
+                        sys.exit()
 
-    player.move(keys)
+            self.states[self.gameStateManager.get_state()].run(events, keys)
 
-    #+========+#
-    #~~Screen~~#
-    #+========+#
+            #+========+#
+            #~~Screen~~#
+            #+========+#
 
-    screen.fill("black")
+            pg.display.flip()
 
-    #+=============+#
-    #~~Render~Game~~#
-    #+=============+#
+            self.clock.tick(60)
+class Level:
+    def __init__(self, display, gameStateManager):
+        self.display = display
+        self.player = Player(self.display)
+        self.gameStateManager = gameStateManager
+        self.inventory = Inventory(self.display, c.SPRITES['items'])
+        self.sprites = ItemSprites(self.display, c.SPRITES['items'])
 
-    player.draw(screen, "red")
+    def run(self, events, keys):
+        self.display.fill('black')
+        self.player.move(keys)
+        self.player.draw(self.display, 'green')
+        self.inventory.update(events)
+        self.sprites.item_sprites()
+
+class Start:
+    def __init__(self, display, gameStateManager):
+        self.display = display
+        self.gameStateManager = gameStateManager
+        self.start_menu = Menus(self.display, c.SPRITES['startMenu'])
+
+    def run(self, events, keys):
+        self.display.fill('gray4')
+        self.start_menu.start_menu_sprites()
+        self.start_menu.menu_options(events, self.gameStateManager)
+        
+            
 
 
-    pg.display.flip()
+class GameStateManager():
+    def __init__(self, currentState):
+        self.currentState = currentState
+    def get_state(self):
+        return self.currentState
+    def set_state(self, state):
+        self.currentState = state
 
-    clock.tick(60)
-
-pg.quit()
-
-    
+if __name__ == '__main__':
+    game = Game()
+    game.set_screen()
+    game.main_game_loop()
