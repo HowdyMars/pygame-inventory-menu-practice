@@ -72,10 +72,8 @@ class Menus(Animation):
 			if event.type == pg.KEYDOWN:
 				if event.key == pg.K_UP and self.menu_index > 1:
 					self.menu_index -= 1
-					print(self.menu_index)
 				if event.key == pg.K_DOWN and self.menu_index <= 1:
 					self.menu_index +=1
-					print(self.menu_index)
 				if event.key == pg.K_SPACE and self.menu_index == 1:
 					gameStateManager.set_state('level')
 				if event.key == pg.K_SPACE and self.menu_index == 2:
@@ -87,8 +85,8 @@ class ItemSprites(Animation):
 		self.item_list = []
 		self.item_list_steps = [5, 15, 1, 10, 1, 15, 15] # 15, 1, 10, 1, 15, 15
 		# index from sprite sheet | indexs: 0 'armor' | 1 'bows' | 2 'ruby' | 3 'helm' | 4 'goldBar' | 5 'shield' | 6 'sword'
-		self.type_index = 4
-		self.item_index = 0
+		self.type_index = 6
+		self.item_index = 4
 		self.frame_count = 0
 
 	def item_sprites(self):

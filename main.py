@@ -11,7 +11,7 @@ class Game():
         pg.init()
         self.screen = pg.display.set_mode((1280, 720))
         self.clock = pg.time.Clock()
-        self.gameStateManager = GameStateManager('level')
+        self.gameStateManager = GameStateManager('start')
 
         # different game states
         self.start = Start(self.screen, self.gameStateManager)
